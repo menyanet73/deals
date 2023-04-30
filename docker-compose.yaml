@@ -1,0 +1,61 @@
+version: "3.6"
+
+services:
+  db:
+    container_name: postgres
+    image: postgres:14.7-alpine
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    env_file:
+      - ./.env
+    expose:
+      - 5432
+    logging:
+      options:
+        max-size: 10m
+    restart: always
+
+  web:
+    container_name: deals_web
+    image: t13_api_web
+    build: .
+    command: >
+      bash -c "python manage.py migrate --no-input && python manage.py createcachetable && gunicorn conf.wsgi:application --workers=2 --timeout 30 --max-requests=10000 --bind 0.0.0.0:8000"
+    volumes:
+      - .:/app
+      - static_volume:/app/static/
+      - uploads_volume:/app/uploads/
+    expose:
+      - 8000
+    env_file:
+      - ./.env
+    depends_on:
+      - db
+    logging:
+      options:
+        max-size: 10m
+    restart: always
+
+  nginx:
+    build: ./nginx
+    container_name: nginx
+    volumes:
+      - static_volume:/app/static/
+      - uploads_volume:/app/uploads/
+    ports:
+      - 80:80
+      - 443:443
+    depends_on:
+      - web
+    env_file:
+      - .env
+    command: /bin/sh -c "envsubst '$$DOMAIN_NAME $$PRERENDER_IO_TOKEN' < /etc/nginx/nginx.conf.template > /etc/nginx/conf.d/nginx.conf; while :; do sleep 6h & wait $${!}; nginx -s reload; done & nginx -g \"daemon off;\""
+    logging:
+      options:
+        max-size: 10m
+    restart: always
+
+volumes:
+  postgres_data:
+  static_volume:
+  uploads_volume:
