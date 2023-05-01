@@ -4,10 +4,11 @@
 
 Deals - это Django приложение для обработки таблиц .csv со сделками и выдачи топ клиентов. 
 
-## Требования
+## Стэк
 
 * Python 3.10
 * Django 4.2
+* БД: PostgreSQL 14.7
 
 ## Установка
 
@@ -45,7 +46,8 @@ docker-compose up
 
 1. Добавление сделок
 ```sh
-curl -X POST -F "deals=@/path/to/deals.csv" http://localhost/api/v1/deals/
+curl --location --request POST 'localhost/api/v1/deals/' \
+--form 'deals=@"/path/to/file/deals.csv"'
 ```
 
 2. Получение списка топ 5 клиентов

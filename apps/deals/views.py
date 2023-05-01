@@ -4,6 +4,9 @@ from django.contrib.postgres.aggregates import ArrayAgg
 from django.core.cache import cache
 from django.db import models, transaction
 from django.db.models import Count, OuterRef, Subquery, Sum
+from drf_yasg.utils import swagger_auto_schema, no_body
+from drf_yasg.openapi import Schema, Response, TYPE_OBJECT, TYPE_INTEGER, TYPE_STRING
+from drf_yasg import openapi
 from rest_framework import request, response, status
 from rest_framework.views import APIView
 
@@ -16,6 +19,11 @@ from conf.settings import CHECK_DUPLICATES
 class DealViewSet(APIView):
     cache_key = 'deal_viewset_cache'
 
+    @swagger_auto_schema(
+        operation_summary='Save deals from deals.csv',
+        request_body=CSVSerializer,
+        tags=['event']
+    )
     def post(self, request: request.Request, *args, **kwargs):
         serializer = CSVSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -59,6 +67,13 @@ class DealViewSet(APIView):
             data='Файл был обработан без ошибок',
             status=status.HTTP_200_OK)
 
+    @swagger_auto_schema(
+        operation_summary='Get top 5 customers',
+        request_body=no_body,
+        responses={
+            status.HTTP_200_OK: ResponseSerializer(),
+        }
+    )
     def get(self, request: request.Request, *args, **kwargs):
         cache_value = cache.get(key=self.cache_key, default=None)
         if cache_value:
