@@ -39,7 +39,7 @@ mv .env.example .env
 
 4. Запустите docker compose
 ```sh
-docker-compose up
+docker-compose up -d
 ```
 
 ## Использование
