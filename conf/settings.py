@@ -22,10 +22,11 @@ PREINSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'rest_framework',
+    'drf_yasg',
 ]
 
 PROJECT_APPS = [
-    'drf_yasg',
     'apps.deals'
 ]
 
